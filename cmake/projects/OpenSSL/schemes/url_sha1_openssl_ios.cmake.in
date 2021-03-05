@@ -106,14 +106,20 @@ foreach(variant @IPHONEOS_ARCHS@ @IPHONESIMULATOR_ARCHS@)
     set(SDK_ROOT ${IPHONEOS_SDK_ROOT})
   endif()
 
-  string(COMPARE EQUAL "${variant}" "arm" ios_cross)
-  if(ios_cross)
+  string(COMPARE EQUAL "${variant}" "arm" arm)
+  string(COMPARE EQUAL "${variant}" "armv7" armv7)
+  if(arm OR armv7)
     set(target "ios-cross")
   endif()
 
   string(COMPARE EQUAL "${variant}" "arm64" ios64_cross)
   if(ios64_cross)
     set(target "ios64-cross")
+  endif()
+
+  string(COMPARE EQUAL "${variant}" "i386" i386)
+  if(i386)
+    set(target "darwin-i386-cc")
   endif()
 
   string(COMPARE EQUAL "${variant}" "x86_64" x86_64)
