@@ -12,6 +12,17 @@ hunter_add_version(
     PACKAGE_NAME
     freetype
     VERSION
+    "2.9.1-p4"
+    URL
+    "https://github.com/regulaforensics/freetype/archive/refs/tags/v2.9.1-p4.tar.gz"
+    SHA1
+    2409311388E54EC839C3E9BEF0EC62C748D1F810
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    freetype
+    VERSION
     "2.9.1-p3"
     URL
     "https://github.com/cpp-pm/freetype/archive/v2.9.1-p3.tar.gz"
