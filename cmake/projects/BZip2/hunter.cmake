@@ -65,6 +65,17 @@ hunter_add_version(
     9125bd674fbe7c8169c8ea6a2a15a414a7dc2f86
 )
 
+hunter_add_version(
+    PACKAGE_NAME
+    BZip2
+    VERSION
+    "1.0.8-p1"
+    URL
+    "https://github.com/regulaforensics/bzip2/archive/refs/tags/v1.0.8-p1.tar.gz"
+    SHA1
+    46137C4EB477E0383DEAE0A809154E85E8FEF862
+)
+
 hunter_cmake_args(
     BZip2
     CMAKE_ARGS
