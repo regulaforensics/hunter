@@ -71,9 +71,9 @@ hunter_add_version(
     VERSION
     "1.0.8-p1"
     URL
-    "https://github.com/regulaforensics/bzip2/archive/refs/tags/v1.0.8-p1.tar.gz"
+    "https://github.com/regulaforensics/bzip2/archive/v1.0.8-p1.tar.gz"
     SHA1
-    46137C4EB477E0383DEAE0A809154E85E8FEF862
+    D3772F29147BDD034109E2B47242AE115ADF2E95
 )
 
 hunter_cmake_args(
