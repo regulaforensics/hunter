@@ -29,8 +29,13 @@ if [[ "$TOOLCHAIN" =~ "ios-nocodesign-13-2" ]]; then
     export DEVELOPER_DIR="/Applications/Xcode_11.3.1.app/Contents/Developer"
 fi
 
+# Use Xcode 12.2 instead of default 12.4 (no macOS 11.0 SDK in Xcode 12.4)
+if [[ "$TOOLCHAIN" =~ "osx-11-0" ]]; then
+    export DEVELOPER_DIR="/Applications/Xcode_12.2.app/Contents/Developer"
+fi
+
 # Run build script
-if [[ "$BRANCH_NAME" == "master" ]]; then
+if [[ "$BRANCH_NAME" == "master" && ! -z "$GITHUB_USER_PASSWORD" ]]; then
     python jenkins.py --upload
 else
     python jenkins.py

@@ -14,7 +14,7 @@ include(hunter_check_toolchain_definition)
 set(Boost_NO_SYSTEM_PATHS ON)
 
 # use base url for official boost releases
-set(_hunter_boost_base_url "https://dl.bintray.com/boostorg/release")
+set(_hunter_boost_base_url "https://boostorg.jfrog.io/artifactory/main/release")
 
 hunter_add_version(
     PACKAGE_NAME
@@ -201,6 +201,28 @@ hunter_add_version(
     "${_hunter_boost_base_url}/1.75.0/source/boost_1_75_0.tar.bz2"
     SHA1
     6109efd3bdd8b9220d7d85b5e125f7f28721b9a9
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    Boost
+    VERSION
+    "1.76.0"
+    URL
+    "${_hunter_boost_base_url}/1.76.0/source/boost_1_76_0.tar.bz2"
+    SHA1
+    8064156508312dde1d834fec3dca9b11006555b6
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    Boost
+    VERSION
+    "1.77.0"
+    URL
+    "${_hunter_boost_base_url}/1.77.0/source/boost_1_77_0.tar.bz2"
+    SHA1
+    0cb4f947d094fc311e13ffacaff00418130ef5ef
 )
 # up until 1.63 sourcefourge was used
 set(_hunter_boost_base_url "https://downloads.sourceforge.net/project/boost/boost/")
@@ -454,7 +476,7 @@ endif()
 
 hunter_pick_scheme(DEFAULT url_sha1_boost)
 hunter_cacheable(Boost)
-hunter_download(PACKAGE_NAME Boost PACKAGE_INTERNAL_DEPS_ID "48")
+hunter_download(PACKAGE_NAME Boost PACKAGE_INTERNAL_DEPS_ID "49")
 
 # This settings Boost_USE_STATIC_LIBS and Boost_USE_STATIC_RUNTIME are needed to configure via find_package(Boost ....) for BoostConfig from boost
 if(NOT HUNTER_Boost_VERSION VERSION_LESS 1.72.0)
@@ -468,7 +490,7 @@ if(NOT HUNTER_Boost_VERSION VERSION_LESS 1.72.0)
         else()
             option(Boost_USE_STATIC_LIBS "Use of the static libraries" OFF)
         endif()
-        
+
         if(MSVC)
             if(boost_static_runtime LESS 0)
                 option(Boost_USE_STATIC_RUNTIME "Use libraries linked statically to the C++ runtime" OFF)
