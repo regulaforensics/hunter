@@ -13,11 +13,11 @@ hunter_add_version(
     PACKAGE_NAME
     jwt-cpp
     VERSION
-    0.5.2
+    0.6.0
     URL
-    "https://github.com/Thalhammer/jwt-cpp/archive/refs/tags/v0.5.2.tar.gz"
+    "https://github.com/Thalhammer/jwt-cpp/archive/v0.6.0.tar.gz"
     SHA1
-    528c0c23ec9d9e5af06770e4a0bc931a94a30a51
+    099ce276013fbb934a03581ca799e690e7e82ed8
 )
 
 hunter_cmake_args(

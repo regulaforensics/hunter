@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018, Ruslan Baratov
+# Copyright (c) 2022, Raffael Casagrande
 # All rights reserved.
 
 # !!! DO NOT PLACE HEADER GUARDS HERE !!!
@@ -11,21 +11,22 @@ include(hunter_cmake_args)
 
 hunter_add_version(
     PACKAGE_NAME
-    EnumGroup
+    oneTBB
     VERSION
-    0.0.1
+    2021.5.0
     URL
-    "https://github.com/Person-93/EnumGroup/archive/0.0.1.tar.gz"
+    "https://github.com/oneapi-src/oneTBB/archive/v2021.5.0.tar.gz"
     SHA1
-    e842e9c81865db3006e1b457b5bedea401ae5734
+    71750727bd1436f4047342d0adb827c25d7bc2b0
 )
 
 hunter_cmake_args(
-    EnumGroup
-    CMAKE_ARGS
-    ENUM_GROUP_WITH_TESTS=OFF
+  oneTBB
+  CMAKE_ARGS
+    TBB_TEST=OFF
+    TBB_STRICT=OFF
 )
 
 hunter_pick_scheme(DEFAULT url_sha1_cmake)
-hunter_cacheable(EnumGroup)
-hunter_download(PACKAGE_NAME EnumGroup)
+hunter_cacheable(oneTBB)
+hunter_download(PACKAGE_NAME oneTBB)
