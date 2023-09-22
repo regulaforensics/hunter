@@ -656,6 +656,17 @@ hunter_add_version(
     34ea65451f7fc4625f31ba50f89b3fbea12f13f3
 )
 
+hunter_add_version(
+    PACKAGE_NAME
+    OpenSSL
+    VERSION
+    "1.1.1w"
+    URL
+    "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1w.tar.gz"
+    SHA1
+    3409260b6a9bf19d10d253c670e5e7b3c7b3a90b
+)
+
 # 3.0 series (LTS)
 hunter_add_version(
     PACKAGE_NAME
