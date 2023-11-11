@@ -35,7 +35,7 @@ hunter_assert_not_empty_string("@IOS_SDK_VERSION@")
 hunter_assert_not_empty_string("@IPHONESIMULATOR_ROOT@")
 hunter_assert_not_empty_string("@IPHONEOS_ROOT@")
 
-hunter_dump_cmake_flags(SKIP_INCLUDES)
+hunter_dump_cmake_flags(SKIP_INCLUDES SKIP_DEPLOYMENT_TARGET)
 # -> CMAKE_CXX_FLAGS
 # -> CMAKE_C_FLAGS
 
@@ -114,7 +114,7 @@ foreach(variant @IPHONEOS_ARCHS@ @IPHONESIMULATOR_ARCHS@)
 
   string(COMPARE EQUAL "${variant}" "arm64" ios64_cross)
   if(ios64_cross)
-    set(target "ios64-cross")
+    set(target "iossimulator-xcrun")
   endif()
 
   string(COMPARE EQUAL "${variant}" "i386" i386)
@@ -156,6 +156,7 @@ foreach(variant @IPHONEOS_ARCHS@ @IPHONESIMULATOR_ARCHS@)
       "-isysroot ${SDK_ROOT}"
       BUILD_COMMAND
       . "@HUNTER_GLOBAL_SCRIPT_DIR@/clear-all.sh" &&
+      export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
       export CROSS_TOP=${CROSS_TOP} &&
       export CROSS_SDK=${CROSS_SDK} &&
       make
