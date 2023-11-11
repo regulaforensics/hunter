@@ -96,7 +96,7 @@ else()
   hunter_fatal_error("TODO: set toolset for boost" ERROR_PAGE "error.boost.toolset")
 endif()
 
-hunter_dump_cmake_flags()
+hunter_dump_cmake_flags(SKIP_DEPLOYMENT_TARGET)
 # -> CMAKE_C_FLAGS
 # -> CMAKE_CXX_FLAGS
 
