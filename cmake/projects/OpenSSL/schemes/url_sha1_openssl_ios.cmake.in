@@ -156,7 +156,6 @@ foreach(variant @IPHONEOS_ARCHS@ @IPHONESIMULATOR_ARCHS@)
       "-isysroot ${SDK_ROOT}"
       BUILD_COMMAND
       . "@HUNTER_GLOBAL_SCRIPT_DIR@/clear-all.sh" &&
-      export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
       export CROSS_TOP=${CROSS_TOP} &&
       export CROSS_SDK=${CROSS_SDK} &&
       make
