@@ -68,7 +68,7 @@ function(hunter_download_cache_meta_file)
   hunter_get_passwords_path(pass_path)
   string(COMPARE NOTEQUAL "${pass_path}" "" has_pass)
 
-  set(total_retry 10)
+  set(total_retry 1)
   foreach(x RANGE ${total_retry})
     foreach(server ${HUNTER_CACHE_SERVERS})
       set(HUNTER_CACHE_SERVER_NAME "${server}")
