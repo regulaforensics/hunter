@@ -15,6 +15,17 @@ hunter_add_version(
     PACKAGE_NAME
     jsoncpp
     VERSION
+    "1.9.6"
+    URL
+    "https://github.com/open-source-parsers/jsoncpp/archive/1.9.6.tar.gz"
+    SHA1
+    fb695d42da4a60e1d25d0757eff8308827f07240
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    jsoncpp
+    VERSION
     "1.9.5-b1"
     URL
     "https://github.com/julianoes/jsoncpp/archive/refs/tags/1.9.5-b1.tar.gz"
