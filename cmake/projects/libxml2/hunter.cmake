@@ -12,6 +12,17 @@ hunter_add_version(
     PACKAGE_NAME
     libxml2
     VERSION
+    "2.12.10"
+    URL
+    "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.12.10/libxml2-v2.12.10.tar.gz"
+    SHA1
+    83bd1e1006bd7d669dc76e03242c0b722b5c593b
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    libxml2
+    VERSION
     "2.9.7-p0"
     URL
     "https://github.com/hunter-packages/libxml2/archive/v2.9.7-p0.tar.gz"
