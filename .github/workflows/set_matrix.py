@@ -16,7 +16,11 @@ def json_from_file_ignore_comments(filepath):
     with open(filepath, "r") as fh:
         for line in fh:
             cleaned_line = line.split("//", 1)[0]
-            if len(cleaned_line) > 0 and line.endswith("\n") and "\n" not in cleaned_line:
+            if (
+                len(cleaned_line) > 0
+                and line.endswith("\n")
+                and "\n" not in cleaned_line
+            ):
                 cleaned_line += "\n"
             contents += cleaned_line
     json_data = json.loads(contents)
