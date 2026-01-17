@@ -9,6 +9,13 @@ include(hunter_download)
 include(hunter_pick_scheme)
 
 hunter_add_version(
+    PACKAGE_NAME libxml2
+    VERSION "2.13.6"
+    URL "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.13.6/libxml2-v2.13.6.tar.gz"
+    SHA1 d60300b0aa243fe137d348bce0d9d8a0dca7c441
+)
+
+hunter_add_version(
     PACKAGE_NAME
     libxml2
     VERSION
