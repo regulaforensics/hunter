@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Ruslan Baratov
 # All rights reserved.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 project(Hunter)
 
 include(ExternalProject) # ExternalProject_Add
@@ -40,9 +40,6 @@ hunter_assert_not_empty_string("${CMAKE_TOOLCHAIN_FILE}")
 hunter_assert_not_empty_string("@HUNTER_TLS_VERIFY@")
 
 if(IOS)
-  if(CMAKE_VERSION VERSION_LESS 3.5)
-    hunter_user_error("CMake 3.5+ version should be used for iOS toolchains")
-  endif()
   string(COMPARE NOTEQUAL "${IPHONEOS_ARCHS}" "" has_device)
   string(COMPARE NOTEQUAL "${IPHONESIMULATOR_ARCHS}" "" has_simulator)
   set(ios_opts "-DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=NO")
@@ -58,32 +55,22 @@ endif()
 
 # https://cmake.org/cmake/help/v3.4/release/3.4.html#modules
 # https://cmake.org/cmake/help/v3.4/module/ExternalProject.html
-if(CMAKE_VERSION VERSION_LESS 3.4)
-  set(uses_terminal "")
-else()
-  set(
-      uses_terminal
-      USES_TERMINAL_DOWNLOAD 1
-      USES_TERMINAL_UPDATE 1
-      USES_TERMINAL_CONFIGURE 1
-      USES_TERMINAL_BUILD 1
-      USES_TERMINAL_TEST 1
-      USES_TERMINAL_INSTALL 1
-  )
-endif()
+set(
+    uses_terminal
+    USES_TERMINAL_DOWNLOAD 1
+    USES_TERMINAL_UPDATE 1
+    USES_TERMINAL_CONFIGURE 1
+    USES_TERMINAL_BUILD 1
+    USES_TERMINAL_TEST 1
+    USES_TERMINAL_INSTALL 1
+)
 
 string(COMPARE NOTEQUAL "@HUNTER_JOBS_OPTION@" "" have_jobs)
 if(have_jobs)
-  string(COMPARE NOTEQUAL "@XCODE_VERSION@" "" is_xcode)
-  if(is_xcode)
-    set(jobs_option "-jobs" "@HUNTER_JOBS_OPTION@")
-  elseif("@MSVC_IDE@")
-    set(jobs_option "/maxcpucount:@HUNTER_JOBS_OPTION@")
-  else()
-    set(jobs_option "-j@HUNTER_JOBS_OPTION@")
-  endif()
+  # Use --parallel for CMake 3.12+ (works with all generators: Ninja, Make, Xcode)
+  set(build_jobs "--parallel @HUNTER_JOBS_OPTION@")
 else()
-  set(jobs_option "")
+  set(build_jobs "")
 endif()
 
 set(previous_project "")
@@ -183,8 +170,7 @@ foreach(configuration ${configuration_types})
           "@CMAKE_COMMAND@"
           --build .
           --config ${configuration}
-          --
-          ${jobs_option}
+          ${build_jobs}
       CMAKE_ARGS
       "-G@CMAKE_GENERATOR@"
       "-C@HUNTER_CACHE_FILE@"
