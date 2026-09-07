@@ -13,6 +13,18 @@ include(hunter_cacheable)
 hunter_cacheable(Eigen)
 
 # List of versions here...
+
+hunter_add_version(
+    PACKAGE_NAME
+    Eigen
+    VERSION
+    "3.4-ort"
+    URL
+    "https://github.com/eigen-mirror/eigen/archive/1d8b82b0740839c0de7f1242a3585e3390ff5f33/eigen-1d8b82b0740839c0de7f1242a3585e3390ff5f33.zip"
+    SHA1
+    05b19b49e6fbb91246be711d801160528c135e34
+)
+
 hunter_add_version(
     PACKAGE_NAME
     Eigen
@@ -203,6 +215,8 @@ hunter_cmake_args(
     # no need for tests or docs to save build-time
     BUILD_TESTING=OFF
     EIGEN_BUILD_DOC=OFF
+    EIGEN_BUILD_BLAS=OFF
+    EIGEN_BUILD_LAPACK=OFF
     HUNTER_INSTALL_LICENSE_FILES=COPYING.MPL2
     ${_android_args}
 )
