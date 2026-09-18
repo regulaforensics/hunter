@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.12)
 project(Hunter)
 
 include(ExternalProject) # ExternalProject_Add
+find_package(Patch REQUIRED)
 
 # Scheme for CMake projects
 
@@ -149,9 +150,9 @@ foreach(configuration ${configuration_types})
   if("@HUNTER_PACKAGE_VERSION@" STREQUAL "3.4-ort")
     set(eigen_patch_command
         PATCH_COMMAND
-        patch --binary --ignore-whitespace -p1 < "@HUNTER_SELF@/cmake/projects/Eigen/s390x-build.patch"
+        "${Patch_EXECUTABLE}" -p1 -i "@HUNTER_SELF@/cmake/projects/Eigen/s390x-build.patch"
         COMMAND
-        patch --binary --ignore-whitespace -p1 < "@HUNTER_SELF@/cmake/projects/Eigen/s390x-build-werror.patch"
+        "${Patch_EXECUTABLE}" -p1 -i "@HUNTER_SELF@/cmake/projects/Eigen/s390x-build-werror.patch"
     )
   else()
     set(eigen_patch_command "")
