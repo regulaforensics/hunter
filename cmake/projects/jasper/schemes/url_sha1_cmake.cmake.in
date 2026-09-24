@@ -150,7 +150,7 @@ foreach(configuration ${configuration_types})
   if("@HUNTER_PACKAGE_VERSION@" STREQUAL "4.2.9")
     set(jasper_patch_command
         PATCH_COMMAND
-        "${Patch_EXECUTABLE}" -p1 -i "@HUNTER_SELF@/cmake/projects/jasper/jasper-stdc-version.patch"
+        "${Patch_EXECUTABLE}" --binary -l -p1 -i "@HUNTER_SELF@/cmake/projects/jasper/jasper-stdc-version.patch"
     )
   else()
     set(jasper_patch_command "")
