@@ -13,6 +13,18 @@ include(hunter_cacheable)
 hunter_cacheable(Eigen)
 
 # List of versions here...
+
+hunter_add_version(
+    PACKAGE_NAME
+    Eigen
+    VERSION
+    "3.4.1"
+    URL
+    "https://gitlab.com/libeigen/eigen/-/archive/3.4.1/eigen-3.4.1.tar.gz"
+    SHA1
+    cfd200ffacaad81c6def7fea45759a0b906ccf07
+)
+
 hunter_add_version(
     PACKAGE_NAME
     Eigen
