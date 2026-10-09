@@ -11,9 +11,11 @@ include(ExternalProject) # ExternalProject_Add
 list(APPEND CMAKE_MODULE_PATH "@HUNTER_SELF@/cmake/modules")
 
 include(hunter_dump_cmake_flags)
+include(hunter_parse_cmake_args_for_keyword)
 include(hunter_pick_archiver)
 include(hunter_status_debug)
 include(hunter_assert_not_empty_string)
+include(hunter_unsetvar)
 include(hunter_user_error)
 
 hunter_status_debug("Scheme: url_sha1_openssl")
@@ -61,6 +63,10 @@ hunter_dump_cmake_flags(${skip_includes})
 # -> CMAKE_CXX_FLAGS
 # -> CMAKE_C_FLAGS
 
+hunter_unsetvar(configure_target)
+hunter_unsetvar(platform_opts)
+hunter_unsetvar(extra_ld_flags)
+
 if(ANDROID)
   string(COMPARE EQUAL "${CMAKE_ANDROID_ARCH}" "" _has_old_cmake)
   string(COMPARE EQUAL "${ANDROID_ARCH_NAME}" "" _has_unexpected_toolchain)
@@ -90,9 +96,9 @@ if(ANDROID)
   # The ./config script only detects Android x86 and armv7 targets anyway.
   # * https://github.com/openssl/openssl/issues/2490
   if (ANDROID_SSL_ARCH MATCHES "mips64|arm64|x86_64")
-    set(configure_opts "linux-generic64")
+    set(configure_target "linux-generic64")
   else()
-    set(configure_opts "linux-generic32")
+    set(configure_target "linux-generic32")
   endif()
 
   # On Android '--sysroot' differs for compile and linker.
@@ -103,22 +109,23 @@ if(ANDROID)
   # * android-ndk-r16b-api-21-armeabi-v7a-neon-clang-libcxx
   # * android-ndk-r17-api-24-arm64-v8a-clang-libcxx14
   # * android-ndk-r18-api-24-arm64-v8a-clang-libcxx14
-  list(APPEND configure_opts "-latomic ${CMAKE_EXE_LINKER_FLAGS}")
+  set(extra_ld_flags "-latomic ${CMAKE_EXE_LINKER_FLAGS}")
 
   # On Clang-based Android NDK toolchains, explicitly linking libunwind is
   # unnecessary and results in malformed flags like "-l-l:libunwind.a", which
-  # break the build. This block strips such flags from configure options to
+  # break the build. This block strips such flags from linker options to
   # ensure successful compilation.
   if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-    string(REPLACE "-l-l:libunwind.a" "" configure_opts "${configure_opts}")
+    string(REPLACE "-l-l:libunwind.a" "" extra_ld_flags "${extra_ld_flags}")
   endif()
 elseif(RASPBERRY_PI)
-  set(configure_opts "linux-generic32")
+  set(configure_target "linux-generic32")
 elseif(OPENWRT)
-  set(configure_opts "linux-generic32" "no-async")
+  set(configure_target "linux-generic32")
+  set(platform_opts "no-async")
 elseif(EMSCRIPTEN)
   # disable features that will not work with emscripten
-  set(configure_opts "no-engine" "no-dso" "no-asm" "no-shared" "no-sse2" "no-srtp")
+  set(platform_opts "no-engine" "no-dso" "no-asm" "no-shared" "no-sse2" "no-srtp")
 endif()
 
 string(REGEX REPLACE "^ " "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -128,9 +135,6 @@ set(configure_command
     MACHINE=${CMAKE_SYSTEM_PROCESSOR}
     CC=${CMAKE_C_COMPILER}
     ${configure_command})
-
-# Pass C flags through
-set(configure_opts ${configure_opts} ${CMAKE_C_FLAGS})
 
 set(
     configure_command
@@ -144,11 +148,51 @@ else()
   set(shared_flag no-shared)
 endif()
 
-if(HUNTER_OPENSSL_NO_MODULE)
-  list(APPEND configure_opts "no-module")
+set(configure_opts ${configure_target} threads ${shared_flag} ${platform_opts})
+
+# Setup user options
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_MODULE
+    OUTPUT no_module
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_TESTS
+    OUTPUT no_tests
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_APPS
+    OUTPUT no_apps
+)
+
+if(no_module)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.0")
+    list(APPEND configure_opts no-module)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_MODULE; ignoring it")
+  endif()
 endif()
 
-set(configure_opts ${configure_opts} threads ${shared_flag})
+if(no_tests)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "1.1.1")
+    list(APPEND configure_opts no-tests)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_TESTS; ignoring it")
+  endif()
+endif()
+
+if(no_apps)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.2")
+    list(APPEND configure_opts no-apps)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_APPS; ignoring it")
+  endif()
+endif()
+
+# Pass C/LD flags through
+list(APPEND configure_opts ${CMAKE_C_FLAGS} ${extra_ld_flags})
 
 hunter_status_debug("Configure command: ${configure_command}")
 hunter_status_debug("Configure options: ${configure_opts}")

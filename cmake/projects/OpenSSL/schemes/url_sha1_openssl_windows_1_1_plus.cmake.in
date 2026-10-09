@@ -14,6 +14,7 @@ list(APPEND CMAKE_MODULE_PATH "@HUNTER_SELF@/cmake/modules")
 
 include(hunter_fatal_error)
 include(hunter_internal_error)
+include(hunter_parse_cmake_args_for_keyword)
 include(hunter_status_debug)
 include(hunter_assert_not_empty_string)
 
@@ -91,8 +92,45 @@ else()
   set(opt "no-asm")
 endif()
 
-if(HUNTER_OPENSSL_NO_MODULE)
-  list(APPEND opt "no-module")
+# Setup user options
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_MODULE
+    OUTPUT no_module
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_TESTS
+    OUTPUT no_tests
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_APPS
+    OUTPUT no_apps
+)
+
+if(no_module)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.0")
+    list(APPEND opt no-module)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_MODULE; ignoring it")
+  endif()
+endif()
+
+if(no_tests)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "1.1.1")
+    list(APPEND opt no-tests)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_TESTS; ignoring it")
+  endif()
+endif()
+
+if(no_apps)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.2")
+    list(APPEND opt no-apps)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_APPS; ignoring it")
+  endif()
 endif()
 
 if("@MSVC@")

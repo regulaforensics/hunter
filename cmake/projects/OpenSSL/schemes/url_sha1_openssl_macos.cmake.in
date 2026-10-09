@@ -11,6 +11,7 @@ include(ExternalProject) # ExternalProject_Add
 list(APPEND CMAKE_MODULE_PATH "@HUNTER_SELF@/cmake/modules")
 
 include(hunter_dump_cmake_flags)
+include(hunter_parse_cmake_args_for_keyword)
 include(hunter_status_debug)
 include(hunter_assert_not_empty_string)
 include(hunter_unsetvar)
@@ -78,19 +79,55 @@ set(configure_command
     CC=${CMAKE_C_COMPILER}
     ${configure_command})
 
-# Pass C flags through
-set(configure_opts ${CMAKE_C_FLAGS})
-
 # Add clear-all to commands
 set(configure_command . "@HUNTER_GLOBAL_SCRIPT_DIR@/clear-all.sh" && "${configure_command}")
 set(build_command . "@HUNTER_GLOBAL_SCRIPT_DIR@/clear-all.sh" && make)
 
-# Configuration options
-set(configure_opts ${configure_opts} threads ${shared_flag})
+set(configure_opts threads ${shared_flag})
 
-if(HUNTER_OPENSSL_NO_MODULE)
-  list(APPEND configure_opts "no-module")
+# Setup user options
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_MODULE
+    OUTPUT no_module
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_TESTS
+    OUTPUT no_tests
+)
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_APPS
+    OUTPUT no_apps
+)
+
+if(no_module)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.0")
+    list(APPEND configure_opts no-module)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_MODULE; ignoring it")
+  endif()
 endif()
+
+if(no_tests)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "1.1.1")
+    list(APPEND configure_opts no-tests)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_TESTS; ignoring it")
+  endif()
+endif()
+
+if(no_apps)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.2")
+    list(APPEND configure_opts no-apps)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_APPS; ignoring it")
+  endif()
+endif()
+
+# Pass C flags through
+list(APPEND configure_opts ${CMAKE_C_FLAGS})
 
 hunter_status_debug("Configure command: ${configure_command}")
 hunter_status_debug("Configure architectures: ${configure_architectures}")
@@ -194,13 +231,13 @@ foreach(arch ${configure_architectures})
       "@HUNTER_PACKAGE_INSTALL_PREFIX@"
           # not used, just avoid creating Install/<name> empty directory
       CONFIGURE_COMMAND
-      "${configure_command}"
+      ${configure_command}
       "${configure_arch}"
-      "${configure_opts}"
+      ${configure_opts}
       "--prefix=@HUNTER_PACKAGE_INSTALL_PREFIX@"
       "--libdir=lib"
       BUILD_COMMAND
-      "${build_command}"
+      ${build_command}
       BUILD_IN_SOURCE
       1
       INSTALL_COMMAND

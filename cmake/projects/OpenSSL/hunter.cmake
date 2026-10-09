@@ -816,10 +816,5 @@ if(MINGW)
   endif()
 endif()
 
-# Add HUNTER_OPENSSL_NO_MODULE=TRUE if OpenSSL is 3.0 or higher
-if("${HUNTER_OpenSSL_VERSION}" VERSION_GREATER_EQUAL "3.0")
-  hunter_cmake_args(OpenSSL CMAKE_ARGS HUNTER_OPENSSL_NO_MODULE=TRUE)
-endif()
-
 hunter_cacheable(OpenSSL)
 hunter_download(PACKAGE_NAME OpenSSL PACKAGE_INTERNAL_DEPS_ID "29")

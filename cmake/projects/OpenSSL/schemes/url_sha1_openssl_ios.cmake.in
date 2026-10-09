@@ -45,9 +45,15 @@ string(REGEX REPLACE "^ " "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 hunter_unsetvar(ssl_input_libraries)
 hunter_unsetvar(crypto_input_libraries)
 
-set(configure_opts threads no-shared)
+set(common_opts threads no-shared)
+hunter_unsetvar(user_opts)
 
 # Setup user options
+hunter_parse_cmake_args_for_keyword(
+    CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
+    KEYWORD NO_MODULE
+    OUTPUT no_module
+)
 hunter_parse_cmake_args_for_keyword(
     CMAKE_ARGS "@HUNTER_OpenSSL_CMAKE_ARGS@"
     KEYWORD NO_TESTS
@@ -59,9 +65,17 @@ hunter_parse_cmake_args_for_keyword(
     OUTPUT no_apps
 )
 
+if(no_module)
+  if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.0")
+    list(APPEND user_opts no-module)
+  else()
+    message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_MODULE; ignoring it")
+  endif()
+endif()
+
 if(no_tests)
   if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "1.1.1")
-    list(APPEND configure_opts no-tests)
+    list(APPEND user_opts no-tests)
   else()
     message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_TESTS; ignoring it")
   endif()
@@ -69,18 +83,11 @@ endif()
 
 if(no_apps)
   if("@HUNTER_OpenSSL_VERSION@" VERSION_GREATER_EQUAL "3.2")
-    list(APPEND configure_opts no-apps)
+    list(APPEND user_opts no-apps)
   else()
     message(WARNING "OpenSSL @HUNTER_OpenSSL_VERSION@ does not support NO_APPS; ignoring it")
   endif()
 endif()
-
-if(HUNTER_OPENSSL_NO_MODULE)
-  list(APPEND configure_opts "no-module")
-endif()
-
-# Pass C flags through
-set(configure_opts ${configure_opts} ${CMAKE_C_FLAGS})
 
 list(APPEND iphoneos_archs @IPHONEOS_ARCHS@)
 list(APPEND iphonesimulator_archs @IPHONESIMULATOR_ARCHS@)
@@ -144,7 +151,7 @@ macro(__setup_platform _platform _archs)
   message(STATUS "platform ${_platform}-${_archs}")
 
   foreach(arch IN ITEMS ${_archs})
-    set(arch_configure_opts ${configure_opts})
+    unset(arch_platform_opts)
     unset(target)
 
     if(is_iphoneos)
@@ -181,7 +188,7 @@ macro(__setup_platform _platform _archs)
       else()
         set(target "darwin64-x86_64-cc")
         if(arch STREQUAL "arm64")
-          set(arch_configure_opts no-asm ${arch_configure_opts})
+          list(APPEND arch_platform_opts no-asm)
         endif()
       endif()
     endif()
@@ -189,8 +196,16 @@ macro(__setup_platform _platform _archs)
     if(arch STREQUAL "x86_64")
       # set_key.c:398:17: error: unsupported inline asm:
       # input with type 'unsigned long' matching output with type 'unsigned int'
-      set(arch_configure_opts no-asm ${arch_configure_opts})
+      list(APPEND arch_platform_opts no-asm)
     endif()
+
+    set(arch_configure_opts
+        ${common_opts}
+        ${arch_platform_opts}
+        no-async
+        ${user_opts}
+        ${CMAKE_C_FLAGS}
+    )
 
     hunter_assert_not_empty_string("${target}")
 
@@ -237,12 +252,11 @@ macro(__setup_platform _platform _archs)
         ./Configure
         "${target}"
         ${arch_configure_opts}
-        "no-async"
-        "--prefix=@HUNTER_PACKAGE_INSTALL_PREFIX@"
-        "--libdir=lib"
         "-arch ${arch}"
         "-isysroot ${CMAKE_OSX_SYSROOT}"
         "${deployment_version_arg}"
+        "--prefix=@HUNTER_PACKAGE_INSTALL_PREFIX@"
+        "--libdir=lib"
         BUILD_COMMAND
         . "@HUNTER_GLOBAL_SCRIPT_DIR@/clear-all.sh" && ${openssl_build_command}
         BUILD_IN_SOURCE
