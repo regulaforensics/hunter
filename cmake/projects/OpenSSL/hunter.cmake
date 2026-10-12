@@ -783,6 +783,17 @@ hunter_add_version(
     PACKAGE_NAME
     OpenSSL
     VERSION
+    "3.5.9"
+    URL
+    "https://www.openssl.org/source/openssl-3.5.9.tar.gz"
+    SHA1
+    fb3b907a6bcb1deb01ac399a849f4d5b03dbe473
+)
+
+hunter_add_version(
+    PACKAGE_NAME
+    OpenSSL
+    VERSION
     "3.5.7"
     URL
     "https://www.openssl.org/source/openssl-3.5.7.tar.gz"
