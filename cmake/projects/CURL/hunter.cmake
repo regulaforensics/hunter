@@ -154,20 +154,27 @@ hunter_add_version(
 )
 
 if (ANDROID OR IOS OR RASPBERRY_PI OR OPENWRT)
-  set(_curl_cmake_args
-      HAVE_FSETXATTR_5=0
-      HAVE_FSETXATTR_5__TRYRUN_OUTPUT=""
-      HAVE_FSETXATTR_6=0
-      HAVE_FSETXATTR_6__TRYRUN_OUTPUT=""
-      HAVE_GLIBC_STRERROR_R=1
-      HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT=""
-      HAVE_POLL_FINE_EXITCODE=0
-      HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=""
-      HAVE_POSIX_STRERROR_R=0
-      HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT=""
-  )
+    set(_curl_cmake_args
+        HAVE_FSETXATTR_5=0
+        HAVE_FSETXATTR_5__TRYRUN_OUTPUT=""
+        HAVE_FSETXATTR_6=0
+        HAVE_FSETXATTR_6__TRYRUN_OUTPUT=""
+        HAVE_POLL_FINE_EXITCODE=0
+        HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=""
+    )
+    # Before curl version 7.61.0, strerror_r flavour was detected with try_run, so cross builds need preset answers.
+    # Since 7.61.0 curl use a try_compile check that works when cross-compiling;
+    # forcing GLIBC here breaks Android/Apple/musl, whose strerror_r is POSIX.
+    if(HUNTER_CURL_VERSION VERSION_LESS 7.61.0)
+        list(APPEND _curl_cmake_args
+            HAVE_GLIBC_STRERROR_R=1
+            HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT=""
+            HAVE_POSIX_STRERROR_R=0
+            HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT=""
+        )
+    endif()
 else()
-  set(_curl_cmake_args "")
+    set(_curl_cmake_args "")
 endif()
 
 if(HUNTER_CURL_VERSION VERSION_GREATER_EQUAL 7.81.0)
