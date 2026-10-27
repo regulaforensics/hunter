@@ -600,8 +600,18 @@ function(hunter_download)
     )
   endif()
 
-  list(GET HUNTER_PACKAGE_CONFIGURATION_TYPES 0 _hunter_wrapper_config)
-  set(cmd "${CMAKE_COMMAND}" --build "${HUNTER_PACKAGE_BUILD_DIR}" --config "${_hunter_wrapper_config}")
+  if(HUNTER_PACKAGE_SCHEME_INSTALL AND HUNTER_PACKAGE_CONFIGURATION_TYPES)
+    if(Release IN_LIST HUNTER_PACKAGE_CONFIGURATION_TYPES)
+      set(_hunter_wrapper_config Release)
+    else()
+      list(GET HUNTER_PACKAGE_CONFIGURATION_TYPES 0 _hunter_wrapper_config)
+    endif()
+    set(cmd "${CMAKE_COMMAND}" --build "${HUNTER_PACKAGE_BUILD_DIR}" --config "${_hunter_wrapper_config}")
+    unset(_hunter_wrapper_config)
+  else()
+    set(cmd "${CMAKE_COMMAND}" --build "${HUNTER_PACKAGE_BUILD_DIR}")
+  endif()
+  
   hunter_print_cmd("${HUNTER_PACKAGE_HOME_DIR}" "${cmd}")
 
   execute_process(
