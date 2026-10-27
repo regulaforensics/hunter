@@ -30,6 +30,7 @@ hunter_status_debug("Scheme: url_sha1_boost_library")
 # Check preconditions
 hunter_assert_not_empty_string("@HUNTER_SELF@")
 hunter_assert_not_empty_string("@HUNTER_EP_NAME@")
+hunter_assert_not_empty_string("@HUNTER_PACKAGE_CONFIGURATION_TYPES@")
 hunter_assert_not_empty_string("@HUNTER_PACKAGE_DOWNLOAD_DIR@")
 hunter_assert_not_empty_string("@HUNTER_PACKAGE_SOURCE_DIR@")
 hunter_assert_not_empty_string("@HUNTER_PACKAGE_BUILD_DIR@")
@@ -168,8 +169,22 @@ if(is_mpi)
   set(variants variant=release) # build bug
 else()
   set(using_mpi "")
-  set(variants variant=debug,release)
   set(copy_mpi_command "")
+
+  # Checks is debug build required
+  set(all_configuration_types @HUNTER_PACKAGE_CONFIGURATION_TYPES@)
+  if(Debug IN_LIST all_configuration_types)
+    list(APPEND boost_variants debug)
+  endif()
+  unset(all_configuration_types)
+
+  # Always have release build
+  list(APPEND boost_variants release)
+  string(REPLACE ";" "," boost_variants_str "${boost_variants}")
+  unset(boost_variants)
+
+  set(variants variant=${boost_variants_str})
+  unset(boost_variants_str)
 endif()
 
 set(BOOST_ALL_DYN_LINK "")
