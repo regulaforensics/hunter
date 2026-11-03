@@ -62,6 +62,7 @@ function(hunter_flush_cache_variables hunter_self)
         CMAKE_INCLUDE_CURRENT_DIR
         CMAKE_INSTALL_NAME_DIR
         CMAKE_CACHEFILE_DIR
+        CMAKE_FIND_PACKAGE_REDIRECTS_DIR
         # Internal Hunter variables
         HUNTER_ROOT
         HUNTER_CACHED_ROOT
