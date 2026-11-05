@@ -10,91 +10,70 @@ function(hunter_flush_cache_variables hunter_self)
 
   hunter_status_debug("Flushing cache")
 
-  # Read list of all cache variables and unset '*_{ROOT|Dir|DIR}' {
   get_directory_property(cache_list CACHE_VARIABLES)
 
-  foreach(x ${cache_list})
-    set(cleanup FALSE)
-    if(x MATCHES "^.*_ROOT$")
-      set(cleanup TRUE)
-    endif()
-    if(x MATCHES "^.*_DIR$")
-      set(cleanup TRUE)
-    endif()
-    if(x MATCHES "^.*_Dir$")
-      set(cleanup TRUE)
-    endif()
+  # Exclude standard variables
+  set(std_variables_list
+    CMAKE_ADSP_ROOT
+    CMAKE_BUILD_WITH_INSTALL_NAME_DIR
+    CMAKE_C_CLANG_TIDY_EXPORT_FIXES_DIR
+    CMAKE_CACHEFILE_DIR
+    CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR
+    CMAKE_FIND_PACKAGE_REDIRECTS_DIR
+    CMAKE_INCLUDE_CURRENT_DIR
+    CMAKE_INSTALL_NAME_DIR
+    CMAKE_OBJC_CLANG_TIDY_EXPORT_FIXES_DIR
+    CMAKE_OBJCXX_CLANG_TIDY_EXPORT_FIXES_DIR
+    CMAKE_PKG_CONFIG_SYSROOT_DIR
+    CMAKE_PKG_CONFIG_TOP_BUILD_DIR
+    CMAKE_ROOT
+    CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR
+    # Internal Hunter variables
+    HUNTER_ROOT
+    HUNTER_CACHED_ROOT
+  )
 
-    # Issue https://github.com/ruslo/hunter/issues/569 {
-    if(x MATCHES "^Boost_.*_LIBRARY_.*$")
-      set(cleanup TRUE)
-    endif()
+  # Exclude standard variables by pattern
+  set(std_patterns_list
+    LIST_DIR
+    SOURCE_DIR
+    BINARY_DIR
+  )
 
-    if(x MATCHES "^Boost_LIBRARY_DIR_.*$")
-      set(cleanup TRUE)
-    endif()
+  # Patterns of variables to clean up
+  set(cleanup_patterns_list
+    "_ROOT$"
+    "_DIR$"
+    "_Dir$"
+    # Issue https://github.com/ruslo/hunter/issues/569
+    "^Boost_.*_LIBRARY_.*$"
+    "^Boost_LIBRARY_DIR_.*$"
+    "^_Boost_LIBRARY_DIR_.*_LAST$"
+    # From OpenCV Android
+    "^OpenCV_3RDPARTY_LIB_DIR_(OPT|DBG)$"
+    "^OpenCV_CONFIG_PATH$"
+    # From FindOpenSSL.cmake
+    "^OPENSSL_(SSL|CRYPTO)_LIBRARY$"
+  )
 
-    if(x MATCHES "^_Boost_LIBRARY_DIR_.*_LAST$")
-      set(cleanup TRUE)
-    endif()
-    # }
+  # Keep only variables matching cleanup patterns
+  string(REPLACE ";" "|" cleanup_regex "${cleanup_patterns_list}")
+  list(FILTER cache_list INCLUDE REGEX "${cleanup_regex}")
 
-    # From OpenCV Android {
-    if(x MATCHES "^OpenCV_3RDPARTY_LIB_DIR_(OPT|DBG)$")
-      set(cleanup TRUE)
-    endif()
+  # Drop exact standard variable names
+  string(REPLACE ";" "|" std_variables_regex "${std_variables_list}")
+  list(FILTER cache_list EXCLUDE REGEX "^(${std_variables_regex})$")
 
-    if(x MATCHES "^OpenCV_CONFIG_PATH$")
-      set(cleanup TRUE)
-    endif()
-    # }
+  # Drop standard variable suffixes
+  string(REPLACE ";" "|" std_patterns_regex "${std_patterns_list}")
+  list(FILTER cache_list EXCLUDE REGEX "_(${std_patterns_regex})$")
 
-    # From FindOpenSSL.cmake {
-    if(x MATCHES "^OPENSSL_(SSL|CRYPTO)_LIBRARY$")
-      set(cleanup TRUE)
-    endif()
-    # }
-
-    # Exclude standard variables {
-    set(
-        std_variables_list
-        CMAKE_ROOT
-        CMAKE_INCLUDE_CURRENT_DIR
-        CMAKE_INSTALL_NAME_DIR
-        CMAKE_CACHEFILE_DIR
-        CMAKE_FIND_PACKAGE_REDIRECTS_DIR
-        # Internal Hunter variables
-        HUNTER_ROOT
-        HUNTER_CACHED_ROOT
-    )
-    foreach(std_variable ${std_variables_list})
-      string(COMPARE EQUAL "${std_variable}" "${x}" is_std_var)
-      if(is_std_var)
-        set(cleanup FALSE)
-      endif()
-    endforeach()
-
-    set(
-        std_patterns_list
-        LIST_DIR
-        SOURCE_DIR
-        BINARY_DIR
-    )
-    foreach(std_pattern ${std_patterns_list})
-      if(x MATCHES "_${std_pattern}$")
-        set(cleanup FALSE)
-      endif()
-    endforeach()
-    # }
-
-    if(cleanup)
-      hunter_status_debug("Removing variable from cache:")
-      hunter_status_debug("  Name = '${x}'")
-      hunter_status_debug("  Value = '${${x}}'")
-      unset("${x}" CACHE)
-    endif()
+  foreach(x IN LISTS cache_list)
+    hunter_status_debug("Removing variable from cache:")
+    hunter_status_debug("  Name = '${x}'")
+    hunter_status_debug("  Value = '${${x}}'")
+    unset("${x}" CACHE)
   endforeach()
-  # }
 
   # Read list of all projects and unset regular, cache and environment variables
   # with name '<package>_{ROOT|Dir|DIR}'
