@@ -600,6 +600,10 @@ function(hunter_download)
     )
   endif()
 
+  # Set CMP0057 ("Support new if() IN_LIST operator.")
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0057 NEW)
+
   if(HUNTER_PACKAGE_SCHEME_INSTALL AND HUNTER_PACKAGE_CONFIGURATION_TYPES)
     if(Release IN_LIST HUNTER_PACKAGE_CONFIGURATION_TYPES)
       set(_hunter_wrapper_config Release)
@@ -611,6 +615,8 @@ function(hunter_download)
   else()
     set(cmd "${CMAKE_COMMAND}" --build "${HUNTER_PACKAGE_BUILD_DIR}")
   endif()
+
+  cmake_policy(POP)
   
   hunter_print_cmd("${HUNTER_PACKAGE_HOME_DIR}" "${cmd}")
 
